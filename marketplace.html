@@ -1,0 +1,881 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LuxeKit | Premium Frontend Marketplace</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        background: '#050505',
+                        surface: '#0a0a0a',
+                        surfaceHighlight: '#121212',
+                        primary: '#D4AF37', // Luxury Gold
+                        primaryHover: '#b5952f',
+                        textMain: '#ffffff',
+                        textMuted: '#a1a1aa',
+                        border: '#27272a',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    animation: {
+                        'spin-slow': 'spin 8s linear infinite',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- React & ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    
+    <!-- Babel for JSX -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <!-- Framer Motion -->
+    <script src="https://unpkg.com/framer-motion@10.16.4/dist/framer-motion.js"></script>
+    
+    <!-- Lucide Icons (Using a basic SVG approach for stability in single file) -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        body {
+            background-color: #050505;
+            color: #ffffff;
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+        }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #050505;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #333;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #D4AF37;
+        }
+
+        .glass {
+            background: rgba(18, 18, 18, 0.6);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.02);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.3s ease;
+        }
+        
+        .glass-card:hover {
+            border-color: rgba(212, 175, 55, 0.3);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 40px -10px rgba(0,0,0,0.5);
+        }
+
+        .text-gradient {
+            background: linear-gradient(to right, #ffffff, #999999);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .text-gradient-gold {
+            background: linear-gradient(to right, #D4AF37, #FFE17D);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .loader-shimmer {
+            background: linear-gradient(90deg, #121212 25%, #1a1a1a 50%, #121212 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef, useMemo } = React;
+        const { motion, AnimatePresence } = window.Motion;
+
+        // --- ICONS ---
+        const Icons = {
+            Search: () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>,
+            ShoppingBag: () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>,
+            User: () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>,
+            LayoutGrid: () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>,
+            ArrowRight: () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>,
+            Check: () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>,
+            Upload: () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>,
+            LogOut: () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>,
+            Filter: () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>,
+            Star: () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="none" class="text-primary"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>,
+            Code: () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>,
+            Zap: () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>,
+            Menu: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>,
+            X: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>,
+            Terminal: () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" y1="19" x2="20" y2="19"></line></svg>
+        };
+
+        // --- MOCK DATABASE (Simulating Google Sheets) ---
+        const MOCK_TEMPLATES = [
+            { id: 't1', name: 'SaaS Landing Pro', category: 'Landing Page', price: 49, description: 'High conversion landing page for SaaS startups.', framework: 'React + Tailwind', rating: 4.9, sales: 120, image: 'https://picsum.photos/seed/t1/600/400', featured: true, darkMode: true },
+            { id: 't2', name: 'FinTech Dashboard', category: 'Dashboard', price: 79, description: 'Complete financial analytics dashboard with charts.', framework: 'Next.js + Recharts', rating: 4.8, sales: 85, image: 'https://picsum.photos/seed/t2/600/400', featured: true, darkMode: true },
+            { id: 't3', name: 'E-Commerce Ultra', category: 'E-Commerce', price: 59, description: 'Modern e-commerce frontend with cart logic.', framework: 'Vue 3', rating: 4.5, sales: 200, image: 'https://picsum.photos/seed/t3/600/400', featured: false, darkMode: false },
+            { id: 't4', name: 'Portfolio Artist', category: 'Portfolio', price: 29, description: 'Minimalist portfolio for creative professionals.', framework: 'HTML + CSS', rating: 5.0, sales: 45, image: 'https://picsum.photos/seed/t4/600/400', featured: false, darkMode: true },
+            { id: 't5', name: 'Crypto Exchange UI', category: 'Dashboard', price: 89, description: 'Real-time crypto trading interface.', framework: 'React + Framer Motion', rating: 4.7, sales: 60, image: 'https://picsum.photos/seed/t5/600/400', featured: true, darkMode: true },
+            { id: 't6', name: 'Blog Minimal', category: 'Blog', price: 19, description: 'Clean typography focused blog template.', framework: 'Next.js', rating: 4.2, sales: 300, image: 'https://picsum.photos/seed/t6/600/400', featured: false, darkMode: true },
+        ];
+
+        const MOCK_USER = {
+            id: 'u1',
+            name: 'Alex Designer',
+            email: 'alex@example.com',
+            role: 'admin', // 'admin' or 'contributor'
+            purchased: ['t3'],
+            favorites: ['t1', 't5']
+        };
+
+        const MOCK_UPLOADS = [
+            { id: 'u1', name: 'Agency Dark', status: 'Approved', date: '2023-10-15', sales: 45 },
+            { id: 'u2', name: 'Personal Blog V2', status: 'Pending', date: '2023-10-20', sales: 0 },
+        ];
+
+        // --- COMPONENTS ---
+
+        // 1. Loader
+        const Loader = ({ onComplete }) => {
+            useEffect(() => {
+                const timer = setTimeout(onComplete, 2000);
+                return () => clearTimeout(timer);
+            }, [onComplete]);
+
+            return (
+                <motion.div 
+                    className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-background"
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.5 }}
+                >
+                    <div className="relative w-24 h-24 mb-6">
+                        <div className="absolute inset-0 border-t-2 border-primary rounded-full animate-spin"></div>
+                        <div className="absolute inset-2 border-r-2 border-white/20 rounded-full animate-spin-slow"></div>
+                        <div className="absolute inset-0 flex items-center justify-center font-bold text-xl tracking-widest text-white">LK</div>
+                    </div>
+                    <motion.h2 
+                        className="text-xl font-light tracking-[0.2em] text-primary"
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                    >
+                        LUXEKIT
+                    </motion.h2>
+                </motion.div>
+            );
+        };
+
+        // 2. Navbar
+        const Navbar = ({ setPage, cartCount, user }) => {
+            const [scrolled, setScrolled] = useState(false);
+            const [menuOpen, setMenuOpen] = useState(false);
+
+            useEffect(() => {
+                const handleScroll = () => setScrolled(window.scrollY > 50);
+                window.addEventListener('scroll', handleScroll);
+                return () => window.removeEventListener('scroll', handleScroll);
+            }, []);
+
+            return (
+                <motion.nav 
+                    className={`fixed top-0 left-0 right-0 z-40 transition-all duration-300 ${scrolled ? 'glass py-4' : 'bg-transparent py-6'}`}
+                    initial={{ y: -100 }}
+                    animate={{ y: 0 }}
+                >
+                    <div className="container mx-auto px-6 flex justify-between items-center">
+                        <div 
+                            className="text-2xl font-bold tracking-tighter cursor-pointer flex items-center gap-2"
+                            onClick={() => setPage('home')}
+                        >
+                            <div className="w-8 h-8 bg-primary rounded-sm flex items-center justify-center text-black font-bold">L</div>
+                            <span>LUXEKIT</span>
+                        </div>
+
+                        {/* Desktop Nav */}
+                        <div className="hidden md:flex items-center gap-8 text-sm font-medium text-textMuted">
+                            <button onClick={() => setPage('home')} className="hover:text-primary transition-colors">Home</button>
+                            <button onClick={() => setPage('shop')} className="hover:text-primary transition-colors">Marketplace</button>
+                            <button onClick={() => setPage('dashboard')} className="hover:text-primary transition-colors">Dashboard</button>
+                            {user.role === 'admin' && (
+                                <button onClick={() => setPage('team')} className="flex items-center gap-1 hover:text-primary transition-colors">
+                                    <Icons.Terminal /> Team
+                                </button>
+                            )}
+                        </div>
+
+                        <div className="hidden md:flex items-center gap-4">
+                            <button className="relative p-2 hover:bg-white/5 rounded-full transition-colors">
+                                <Icons.Search />
+                            </button>
+                            <button 
+                                onClick={() => setPage('dashboard')}
+                                className="flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-full transition-all"
+                            >
+                                <Icons.User />
+                                <span className="text-sm">{user.name}</span>
+                            </button>
+                        </div>
+
+                        {/* Mobile Toggle */}
+                        <div className="md:hidden">
+                            <button onClick={() => setMenuOpen(!menuOpen)}>
+                                {menuOpen ? <Icons.X /> : <Icons.Menu />}
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Mobile Menu */}
+                    <AnimatePresence>
+                        {menuOpen && (
+                            <motion.div 
+                                className="absolute top-full left-0 right-0 bg-surface border-b border-border md:hidden overflow-hidden"
+                                initial={{ height: 0 }}
+                                animate={{ height: 'auto' }}
+                                exit={{ height: 0 }}
+                            >
+                                <div className="flex flex-col p-6 gap-4">
+                                    <button onClick={() => {setPage('home'); setMenuOpen(false);}}>Home</button>
+                                    <button onClick={() => {setPage('shop'); setMenuOpen(false);}}>Marketplace</button>
+                                    <button onClick={() => {setPage('dashboard'); setMenuOpen(false);}}>Dashboard</button>
+                                    {user.role === 'admin' && (
+                                        <button onClick={() => {setPage('team'); setMenuOpen(false);}}>Team Portal</button>
+                                    )}
+                                </div>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+                </motion.nav>
+            );
+        };
+
+        // 3. Footer
+        const Footer = () => (
+            <footer className="border-t border-border bg-surface pt-16 pb-8">
+                <div className="container mx-auto px-6">
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
+                        <div>
+                            <div className="text-xl font-bold tracking-tighter mb-4 flex items-center gap-2">
+                                <div className="w-6 h-6 bg-primary rounded-sm"></div>
+                                LUXEKIT
+                            </div>
+                            <p className="text-textMuted text-sm leading-relaxed">
+                                Premium digital assets for modern creators. Build faster, launch better.
+                            </p>
+                        </div>
+                        <div>
+                            <h4 className="font-bold mb-4">Marketplace</h4>
+                            <ul className="space-y-2 text-sm text-textMuted">
+                                <li className="hover:text-primary cursor-pointer">Templates</li>
+                                <li className="hover:text-primary cursor-pointer">UI Kits</li>
+                                <li className="hover:text-primary cursor-pointer">Icons</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h4 className="font-bold mb-4">Company</h4>
+                            <ul className="space-y-2 text-sm text-textMuted">
+                                <li className="hover:text-primary cursor-pointer">About</li>
+                                <li className="hover:text-primary cursor-pointer">Careers</li>
+                                <li className="hover:text-primary cursor-pointer">Contact</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h4 className="font-bold mb-4">Stay Updated</h4>
+                            <div className="flex">
+                                <input type="email" placeholder="Enter your email" className="bg-white/5 border border-border rounded-l-md px-4 py-2 text-sm w-full focus:outline-none focus:border-primary" />
+                                <button className="bg-primary text-black font-medium px-4 py-2 rounded-r-md hover:bg-primaryHover transition-colors">Go</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="text-center text-xs text-textMuted pt-8 border-t border-white/5">
+                        © 2023 LuxeKit Marketplace. All rights reserved.
+                    </div>
+                </div>
+            </footer>
+        );
+
+        // 4. Product Card
+        const ProductCard = ({ product, onView }) => (
+            <motion.div 
+                layout
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="glass-card rounded-xl overflow-hidden group cursor-pointer flex flex-col h-full"
+                onClick={() => onView(product)}
+            >
+                <div className="relative overflow-hidden aspect-[16/10]">
+                    <img src={product.image} alt={product.name} className="object-cover w-full h-full transition-transform duration-500 group-hover:scale-105" />
+                    <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-4">
+                        <button className="p-3 bg-white rounded-full text-black hover:bg-primary hover:text-white transition-colors transform translate-y-4 group-hover:translate-y-0 duration-300">
+                            <Icons.Search />
+                        </button>
+                    </div>
+                    {product.featured && (
+                        <span className="absolute top-3 right-3 bg-primary text-black text-xs font-bold px-2 py-1 rounded">
+                            Featured
+                        </span>
+                    )}
+                </div>
+                <div className="p-5 flex flex-col flex-grow">
+                    <div className="flex justify-between items-start mb-2">
+                        <div className="text-xs text-primary font-medium uppercase tracking-wider">{product.category}</div>
+                        <div className="flex items-center gap-1 text-xs text-textMuted">
+                            <Icons.Star /> {product.rating}
+                        </div>
+                    </div>
+                    <h3 className="text-lg font-bold mb-2 group-hover:text-primary transition-colors">{product.name}</h3>
+                    <p className="text-sm text-textMuted mb-4 line-clamp-2">{product.description}</p>
+                    <div className="mt-auto flex justify-between items-center pt-4 border-t border-white/5">
+                        <div className="flex gap-2">
+                             {product.darkMode && <span className="text-[10px] border border-white/10 px-2 py-0.5 rounded text-textMuted">Dark</span>}
+                             <span className="text-[10px] border border-white/10 px-2 py-0.5 rounded text-textMuted">{product.framework}</span>
+                        </div>
+                        <span className="font-bold text-lg">${product.price}</span>
+                    </div>
+                </div>
+            </motion.div>
+        );
+
+        // --- PAGES ---
+
+        // 1. Home Page
+        const HomePage = ({ setPage, templates }) => {
+            const featured = templates.filter(t => t.featured);
+            
+            return (
+                <motion.div exit={{ opacity: 0 }} className="pt-20">
+                    {/* Hero */}
+                    <section className="min-h-[80vh] flex items-center justify-center relative overflow-hidden">
+                        <div className="absolute inset-0 z-0">
+                            <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/10 rounded-full blur-[100px]"></div>
+                            <div className="absolute bottom-1/4 right-1/4 w-64 h-64 bg-blue-500/10 rounded-full blur-[80px]"></div>
+                        </div>
+                        <div className="container mx-auto px-6 relative z-10 text-center">
+                            <motion.div 
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: 0.2 }}
+                            >
+                                <span className="inline-block py-1 px-3 rounded-full bg-white/5 border border-white/10 text-primary text-xs font-bold tracking-widest mb-6">
+                                    NEW V2.0 COMPONENTS
+                                </span>
+                                <h1 className="text-5xl md:text-7xl font-bold mb-6 tracking-tight">
+                                    Premium <span className="text-gradient-gold">Frontend</span><br />
+                                    Templates Ready to Launch
+                                </h1>
+                                <p className="text-textMuted text-lg md:text-xl max-w-2xl mx-auto mb-10">
+                                    Curated collection of high-performance, aesthetically stunning UI kits and landing pages built with Next.js and Tailwind.
+                                </p>
+                                <div className="flex flex-col md:flex-row justify-center gap-4">
+                                    <button 
+                                        onClick={() => setPage('shop')}
+                                        className="px-8 py-4 bg-primary text-black font-bold rounded-full hover:bg-primaryHover transition-all hover:scale-105 flex items-center justify-center gap-2"
+                                    >
+                                        Explore Templates <Icons.ArrowRight />
+                                    </button>
+                                    <button className="px-8 py-4 bg-white/5 border border-white/10 text-white font-bold rounded-full hover:bg-white/10 transition-all backdrop-blur-sm">
+                                        View Live Demos
+                                    </button>
+                                </div>
+                            </motion.div>
+                        </div>
+                    </section>
+
+                    {/* Featured */}
+                    <section className="py-20 bg-surface/50">
+                        <div className="container mx-auto px-6">
+                            <div className="flex justify-between items-end mb-12">
+                                <div>
+                                    <h2 className="text-3xl font-bold mb-2">Featured Templates</h2>
+                                    <p className="text-textMuted">Hand-picked by our design team.</p>
+                                </div>
+                                <button onClick={() => setPage('shop')} className="hidden md:flex items-center gap-2 text-primary hover:text-white transition-colors">
+                                    View All <Icons.ArrowRight />
+                                </button>
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                                {featured.map(t => (
+                                    <ProductCard key={t.id} product={t} onView={(p) => setPage('product', { product: p })} />
+                                ))}
+                            </div>
+                        </div>
+                    </section>
+                    
+                    {/* Stats / Why Us */}
+                    <section className="py-20 border-t border-border">
+                         <div className="container mx-auto px-6 grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+                             <div className="p-8 glass-card rounded-2xl">
+                                 <div className="text-4xl font-bold text-primary mb-4">100%</div>
+                                 <h3 className="text-xl font-bold mb-2">Refund Policy</h3>
+                                 <p className="text-textMuted text-sm">Not satisfied? Get your money back within 14 days.</p>
+                             </div>
+                             <div className="p-8 glass-card rounded-2xl">
+                                 <div className="text-4xl font-bold text-primary mb-4">24/7</div>
+                                 <h3 className="text-xl font-bold mb-2">Premium Support</h3>
+                                 <p className="text-textMuted text-sm">Direct access to creators for technical help.</p>
+                             </div>
+                             <div className="p-8 glass-card rounded-2xl">
+                                 <div className="text-4xl font-bold text-primary mb-4">50+</div>
+                                 <h3 className="text-xl font-bold mb-2">Components</h3>
+                                 <p className="text-textMuted text-sm">Every kit includes reusable, accessible components.</p>
+                             </div>
+                         </div>
+                    </section>
+                </motion.div>
+            );
+        };
+
+        // 2. Shop Page
+        const ShopPage = ({ setPage, templates }) => {
+            const [filter, setFilter] = useState('All');
+            const [search, setSearch] = useState('');
+
+            const filtered = templates.filter(t => {
+                const matchesCategory = filter === 'All' || t.category === filter;
+                const matchesSearch = t.name.toLowerCase().includes(search.toLowerCase());
+                return matchesCategory && matchesSearch;
+            });
+
+            const categories = ['All', ...new Set(templates.map(t => t.category))];
+
+            return (
+                <motion.div exit={{ opacity: 0 }} className="pt-28 pb-20 container mx-auto px-6">
+                    <div className="flex flex-col md:flex-row justify-between items-center mb-12 gap-6">
+                        <div>
+                            <h1 className="text-4xl font-bold mb-2">Marketplace</h1>
+                            <p className="text-textMuted">Find the perfect starting point for your next project.</p>
+                        </div>
+                        <div className="flex items-center gap-4 w-full md:w-auto">
+                            <div className="relative flex-grow md:flex-grow-0">
+                                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-textMuted">
+                                    <Icons.Search />
+                                </div>
+                                <input 
+                                    type="text" 
+                                    placeholder="Search templates..." 
+                                    className="pl-10 pr-4 py-2 bg-white/5 border border-border rounded-full w-full md:w-64 focus:outline-none focus:border-primary transition-colors"
+                                    value={search}
+                                    onChange={(e) => setSearch(e.target.value)}
+                                />
+                            </div>
+                            <button className="p-2 border border-border rounded-full hover:bg-white/5 transition-colors hidden md:block">
+                                <Icons.Filter />
+                            </button>
+                        </div>
+                    </div>
+
+                    <div className="flex flex-col md:flex-row gap-12">
+                        {/* Sidebar Filters */}
+                        <aside className="w-full md:w-64 flex-shrink-0 space-y-8">
+                            <div>
+                                <h3 className="font-bold mb-4 text-sm tracking-wider uppercase text-textMuted">Categories</h3>
+                                <div className="space-y-2">
+                                    {categories.map(cat => (
+                                        <button 
+                                            key={cat}
+                                            onClick={() => setFilter(cat)}
+                                            className={`block w-full text-left px-3 py-2 rounded-lg text-sm transition-colors ${filter === cat ? 'bg-primary text-black font-medium' : 'hover:bg-white/5 text-textMuted'}`}
+                                        >
+                                            {cat}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                        </aside>
+
+                        {/* Grid */}
+                        <div className="flex-grow">
+                            {filtered.length === 0 ? (
+                                <div className="text-center py-20 text-textMuted">
+                                    No templates found matching your criteria.
+                                </div>
+                            ) : (
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                                    {filtered.map(t => (
+                                        <ProductCard key={t.id} product={t} onView={(p) => setPage('product', { product: p })} />
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </motion.div>
+            );
+        };
+
+        // 3. Product Details Modal (Simulating Page)
+        const ProductModal = ({ product, onClose, onBuy }) => {
+            if (!product) return null;
+
+            return (
+                <motion.div 
+                    className="fixed inset-0 z-50 flex items-center justify-center p-4 md:p-8 bg-black/80 backdrop-blur-sm"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                >
+                    <motion.div 
+                        className="bg-surface border border-border w-full max-w-5xl max-h-[90vh] overflow-y-auto rounded-2xl relative flex flex-col md:flex-row shadow-2xl"
+                        initial={{ scale: 0.95, y: 20 }}
+                        animate={{ scale: 1, y: 0 }}
+                        exit={{ scale: 0.95, y: 20 }}
+                    >
+                        <button onClick={onClose} className="absolute top-4 right-4 z-10 p-2 bg-black/50 rounded-full text-white hover:bg-white hover:text-black transition-colors">
+                            <Icons.X />
+                        </button>
+
+                        {/* Image Side */}
+                        <div className="w-full md:w-1/2 bg-[#111] relative min-h-[400px]">
+                            <img src={product.image} className="w-full h-full object-cover" alt={product.name} />
+                            <div className="absolute bottom-6 left-6 flex gap-2">
+                                <button className="flex items-center gap-2 px-4 py-2 bg-black/60 backdrop-blur rounded-lg text-sm font-medium hover:bg-white hover:text-black transition-colors">
+                                    <Icons.Zap /> Live Demo
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Info Side */}
+                        <div className="w-full md:w-1/2 p-8 md:p-12 flex flex-col">
+                            <div className="flex items-center gap-2 mb-4">
+                                <span className="text-primary font-bold tracking-wider text-sm">{product.category}</span>
+                                <span className="text-textMuted">•</span>
+                                <span className="text-textMuted text-sm">{product.framework}</span>
+                            </div>
+                            
+                            <h2 className="text-3xl md:text-4xl font-bold mb-4">{product.name}</h2>
+                            
+                            <div className="flex items-center gap-4 mb-6">
+                                <div className="flex items-center gap-1 text-primary">
+                                    {[...Array(5)].map((_, i) => (
+                                        <Icons.Star key={i} />
+                                    ))}
+                                    <span className="text-white ml-2 font-medium">{product.rating}</span>
+                                </div>
+                                <span className="text-textMuted">({product.sales} sales)</span>
+                            </div>
+
+                            <p className="text-textMuted text-lg mb-8 leading-relaxed">
+                                {product.description} This template includes full source code, documentation, and 6 months of support. Built with performance and SEO in mind.
+                            </p>
+
+                            <div className="space-y-4 mb-8">
+                                <h4 className="font-bold">Features</h4>
+                                <ul className="grid grid-cols-2 gap-2 text-sm text-textMuted">
+                                    <li className="flex items-center gap-2"><Icons.Check className="text-green-500 w-4 h-4" /> Responsive Design</li>
+                                    <li className="flex items-center gap-2"><Icons.Check className="text-green-500 w-4 h-4" /> Dark Mode Ready</li>
+                                    <li className="flex items-center gap-2"><Icons.Check className="text-green-500 w-4 h-4" /> Clean Code</li>
+                                    <li className="flex items-center gap-2"><Icons.Check className="text-green-500 w-4 h-4" /> W3C Valid</li>
+                                </ul>
+                            </div>
+
+                            <div className="mt-auto pt-6 border-t border-border flex items-center justify-between">
+                                <div>
+                                    <div className="text-sm text-textMuted">Personal License</div>
+                                    <div className="text-4xl font-bold">${product.price}</div>
+                                </div>
+                                <button 
+                                    onClick={() => onBuy(product)}
+                                    className="px-8 py-4 bg-primary text-black font-bold rounded-xl hover:bg-primaryHover transition-all hover:scale-105 shadow-lg shadow-primary/20"
+                                >
+                                    Buy Now
+                                </button>
+                            </div>
+                        </div>
+                    </motion.div>
+                </motion.div>
+            );
+        };
+
+        // 4. User Dashboard
+        const UserDashboard = ({ user, setPage }) => {
+            return (
+                <motion.div exit={{ opacity: 0 }} className="pt-28 pb-20 container mx-auto px-6">
+                    <h1 className="text-3xl font-bold mb-8">My Dashboard</h1>
+                    
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                        {/* Sidebar */}
+                        <div className="glass-card rounded-xl p-6 h-fit">
+                            <div className="flex items-center gap-4 mb-6">
+                                <div className="w-12 h-12 bg-gradient-to-br from-primary to-purple-600 rounded-full flex items-center justify-center text-black font-bold text-lg">
+                                    {user.name.charAt(0)}
+                                </div>
+                                <div>
+                                    <div className="font-bold">{user.name}</div>
+                                    <div className="text-xs text-textMuted">{user.email}</div>
+                                </div>
+                            </div>
+                            <nav className="space-y-1">
+                                <button className="w-full text-left px-4 py-2 rounded-lg bg-white/5 text-white font-medium">My Purchases</button>
+                                <button className="w-full text-left px-4 py-2 rounded-lg hover:bg-white/5 text-textMuted">Downloads</button>
+                                <button className="w-full text-left px-4 py-2 rounded-lg hover:bg-white/5 text-textMuted">Settings</button>
+                                <button className="w-full text-left px-4 py-2 rounded-lg hover:bg-white/5 text-textMuted flex items-center gap-2 text-red-400">
+                                    <Icons.LogOut /> <span>Logout</span>
+                                </button>
+                            </nav>
+                        </div>
+
+                        {/* Content */}
+                        <div className="lg:col-span-2 space-y-8">
+                            <section>
+                                <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
+                                    <Icons.ShoppingBag /> Purchased Templates
+                                </h2>
+                                {user.purchased.length === 0 ? (
+                                    <div className="p-8 text-center border border-dashed border-border rounded-xl text-textMuted">
+                                        You haven't purchased any templates yet.
+                                        <button onClick={() => setPage('shop')} className="block mx-auto mt-4 text-primary hover:underline">Browse Marketplace</button>
+                                    </div>
+                                ) : (
+                                    <div className="space-y-4">
+                                        {user.purchased.map(pid => {
+                                            const product = MOCK_TEMPLATES.find(t => t.id === pid);
+                                            return product ? (
+                                                <div key={product.id} className="glass-card p-4 rounded-xl flex gap-4 items-center">
+                                                    <img src={product.image} className="w-16 h-12 object-cover rounded" alt="" />
+                                                    <div className="flex-grow">
+                                                        <div className="font-bold">{product.name}</div>
+                                                        <div className="text-xs text-textMuted">Purchased on Oct 24, 2023</div>
+                                                    </div>
+                                                    <button className="px-4 py-2 bg-white/5 hover:bg-white/10 rounded-lg text-sm font-medium border border-white/10 flex items-center gap-2 transition-colors">
+                                                        <Icons.Download /> Download
+                                                    </button>
+                                                </div>
+                                            ) : null;
+                                        })}
+                                    </div>
+                                )}
+                            </section>
+                        </div>
+                    </div>
+                </motion.div>
+            );
+        };
+
+        // 5. Team/Contributor Dashboard
+        const TeamDashboard = ({ setPage }) => {
+            const [uploads, setUploads] = useState(MOCK_UPLOADS);
+            const [isUploading, setIsUploading] = useState(false);
+            const [dragActive, setDragActive] = useState(false);
+
+            const handleUpload = (e) => {
+                e.preventDefault();
+                setIsUploading(true);
+                setTimeout(() => {
+                    const newUpload = {
+                        id: `u${Date.now()}`,
+                        name: 'New Project.zip',
+                        status: 'Pending',
+                        date: new Date().toISOString().split('T')[0],
+                        sales: 0
+                    };
+                    setUploads([newUpload, ...uploads]);
+                    setIsUploading(false);
+                }, 1500);
+            };
+
+            return (
+                <motion.div exit={{ opacity: 0 }} className="pt-28 pb-20 container mx-auto px-6">
+                    <div className="flex justify-between items-center mb-8">
+                        <div>
+                            <h1 className="text-3xl font-bold">Team Workspace</h1>
+                            <p className="text-textMuted">Manage templates and track performance.</p>
+                        </div>
+                        <button className="px-4 py-2 bg-primary text-black font-bold rounded-lg flex items-center gap-2">
+                            <Icons.Plus /> New Upload
+                        </button>
+                    </div>
+
+                    <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+                        {/* Upload Area */}
+                        <div className="lg:col-span-1 space-y-8">
+                            <div 
+                                className={`glass-card rounded-xl p-8 text-center border-2 border-dashed transition-colors ${dragActive ? 'border-primary bg-primary/5' : 'border-border'}`}
+                                onDragEnter={() => setDragActive(true)}
+                                onDragLeave={() => setDragActive(false)}
+                                onDragOver={(e) => e.preventDefault()}
+                                onDrop={(e) => { e.preventDefault(); setDragActive(false); handleUpload(e); }}
+                            >
+                                <div className="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-4 text-primary">
+                                    <Icons.Upload />
+                                </div>
+                                <h3 className="font-bold mb-2">Upload Template</h3>
+                                <p className="text-sm text-textMuted mb-4">Drag & drop ZIP file here or click to browse.</p>
+                                <button onClick={handleUpload} disabled={isUploading} className="w-full py-2 bg-white/10 hover:bg-white/20 rounded-lg text-sm font-medium transition-colors disabled:opacity-50">
+                                    {isUploading ? 'Uploading...' : 'Select File'}
+                                </button>
+                            </div>
+
+                            <div className="glass-card rounded-xl p-6">
+                                <h3 className="font-bold mb-4">Stats</h3>
+                                <div className="space-y-4">
+                                    <div>
+                                        <div className="text-sm text-textMuted">Total Sales</div>
+                                        <div className="text-2xl font-bold">$1,240</div>
+                                    </div>
+                                    <div>
+                                        <div className="text-sm text-textMuted">Total Uploads</div>
+                                        <div className="text-2xl font-bold">{uploads.length}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* List Area */}
+                        <div className="lg:col-span-3 glass-card rounded-xl overflow-hidden">
+                            <table className="w-full text-left">
+                                <thead className="bg-white/5 text-xs uppercase text-textMuted">
+                                    <tr>
+                                        <th className="px-6 py-4">Name</th>
+                                        <th className="px-6 py-4">Date</th>
+                                        <th className="px-6 py-4">Status</th>
+                                        <th className="px-6 py-4">Sales</th>
+                                        <th className="px-6 py-4">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-white/5">
+                                    {uploads.map((item, index) => (
+                                        <tr key={item.id} className="hover:bg-white/5 transition-colors">
+                                            <td className="px-6 py-4 font-medium flex items-center gap-3">
+                                                <div className="w-8 h-8 bg-primary/20 text-primary rounded flex items-center justify-center">
+                                                    <Icons.Code />
+                                                </div>
+                                                {item.name}
+                                            </td>
+                                            <td className="px-6 py-4 text-textMuted">{item.date}</td>
+                                            <td className="px-6 py-4">
+                                                <span className={`px-2 py-1 rounded-full text-xs font-medium ${item.status === 'Approved' ? 'bg-green-500/20 text-green-500' : 'bg-yellow-500/20 text-yellow-500'}`}>
+                                                    {item.status}
+                                                </span>
+                                            </td>
+                                            <td className="px-6 py-4">{item.sales}</td>
+                                            <td className="px-6 py-4">
+                                                <button className="text-textMuted hover:text-white">Edit</button>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </motion.div>
+            );
+        };
+
+        const DownloadIcon = () => (
+             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+        )
+        const PlusIcon = () => (
+             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+        )
+
+        // --- MAIN APP SHELL ---
+        const App = () => {
+            const [loading, setLoading] = useState(true);
+            const [view, setView] = useState('home'); // home, shop, dashboard, team
+            const [selectedProduct, setSelectedProduct] = useState(null);
+            const [user, setUser] = useState(MOCK_USER);
+            const [toast, setToast] = useState(null);
+
+            // Helper to handle page changes with scroll to top
+            const changePage = (pageName, params = {}) => {
+                window.scrollTo(0, 0);
+                if (pageName === 'product' && params.product) {
+                    setSelectedProduct(params.product);
+                } else {
+                    setSelectedProduct(null);
+                }
+                setView(pageName);
+            };
+
+            const handleBuy = (product) => {
+                // Simulate API call to Google Sheets / Orders
+                const newUser = { ...user, purchased: [...user.purchased, product.id] };
+                setUser(newUser);
+                
+                // Close modal
+                setSelectedProduct(null);
+                
+                // Show success toast
+                setToast(`Successfully purchased ${product.name}!`);
+                setTimeout(() => setToast(null), 3000);
+            };
+
+            if (loading) return <Loader onComplete={() => setLoading(false)} />;
+
+            return (
+                <div className="min-h-screen relative">
+                    <Navbar setPage={changePage} cartCount={0} user={user} />
+                    
+                    <main className="min-h-screen">
+                        <AnimatePresence mode="wait">
+                            {view === 'home' && <HomePage key="home" setPage={changePage} templates={MOCK_TEMPLATES} />}
+                            {view === 'shop' && <ShopPage key="shop" setPage={changePage} templates={MOCK_TEMPLATES} />}
+                            {view === 'dashboard' && <UserDashboard key="dashboard" user={user} setPage={changePage} />}
+                            {view === 'team' && <TeamDashboard key="team" setPage={changePage} />}
+                        </AnimatePresence>
+                    </main>
+
+                    <Footer />
+
+                    <AnimatePresence>
+                        {selectedProduct && (
+                            <ProductModal 
+                                product={selectedProduct} 
+                                onClose={() => setSelectedProduct(null)} 
+                                onBuy={handleBuy}
+                            />
+                        )}
+                    </AnimatePresence>
+
+                    {/* Toast Notification */}
+                    <AnimatePresence>
+                        {toast && (
+                            <motion.div 
+                                initial={{ opacity: 0, y: 50 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: 50 }}
+                                className="fixed bottom-8 left-1/2 -translate-x-1/2 bg-primary text-black px-6 py-3 rounded-full font-bold shadow-2xl z-50 flex items-center gap-2"
+                            >
+                                <Icons.Check /> {toast}
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
