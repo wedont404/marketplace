@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { users } from "@/lib/data";
+import { loginUser, registerUser } from "@/lib/api";
 
 const AuthContext = createContext(null);
 const STORAGE_KEY = "luxe-marketplace-user";
@@ -21,23 +21,20 @@ export function AuthProvider({ children }) {
   }, []);
 
   const login = async ({ email, password }) => {
-    const matched = users.find(
-      (entry) => entry.email.toLowerCase() === email.toLowerCase() && entry.password === password
-    );
+    const authUser = await loginUser({ email, password });
 
-    if (!matched) {
+    if (!authUser) {
       throw new Error("Invalid credentials");
     }
 
-    const authUser = {
-      userId: matched.userId,
-      name: matched.name,
-      email: matched.email,
-      role: matched.role,
-      purchasedItems: matched.purchasedItems,
-      favorites: matched.favorites
-    };
+    setUser(authUser);
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(authUser));
+    router.push(authUser.role === "Admin" ? "/admin" : "/dashboard");
+    return authUser;
+  };
 
+  const register = async (payload) => {
+    const authUser = await registerUser(payload);
     setUser(authUser);
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(authUser));
     router.push(authUser.role === "Admin" ? "/admin" : "/dashboard");
@@ -63,6 +60,7 @@ export function AuthProvider({ children }) {
       user,
       loading,
       login,
+      register,
       logout,
       updateUser,
       isAdmin: user?.role === "Admin",

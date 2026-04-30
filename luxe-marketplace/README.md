@@ -2,6 +2,10 @@
 
 Premium frontend-only marketplace built with Next.js App Router, React, Tailwind CSS, Framer Motion, Lucide icons, and a Google Sheets / Apps Script backend pattern.
 
+Google Sheets target currently planned around:
+
+`1M67XJtour1UwVTOnJow1tiy3Te_e6SHYfjrd9w_G0cw`
+
 ## Included
 
 - Homepage with premium dark visual direction
@@ -15,8 +19,10 @@ Premium frontend-only marketplace built with Next.js App Router, React, Tailwind
 
 ## Demo login
 
-- Admin: `admin@luxe.dev` / `admin123`
-- Contributor: `contributor@luxe.dev` / `demo123`
+- Admin: `tresor@luxe.rw` / `tresor123`
+- Admin: `cyusa@luxe.rw` / `cyusa123`
+- Admin: `asly@luxe.rw` / `asly123`
+- Contributor: `contributor@luxe.rw` / `demo123`
 
 ## Google Sheets / Apps Script setup
 
@@ -32,6 +38,12 @@ Supported action patterns in the frontend:
 - `?action=getUploads`
 - `?action=getUsers`
 - `?action=uploadTemplate`
+- `?action=loginUser`
+- `?action=registerUser`
+- `?action=getAdminProfiles`
+- `?action=saveAdminProfile`
+- `?action=getHtmlShowcases`
+- `?action=getDbConnections`
 
 ## Suggested Sheets
 
@@ -49,3 +61,9 @@ Supported action patterns in the frontend:
 npm install
 npm run dev
 ```
+
+## Apps Script
+
+Paste-ready Apps Script files are in:
+
+`google-apps-script/`

@@ -6,9 +6,9 @@ export function cn(...inputs) {
 }
 
 export function currency(value) {
-  return new Intl.NumberFormat("en-US", {
+  return new Intl.NumberFormat("en-RW", {
     style: "currency",
-    currency: "USD",
+    currency: "RWF",
     maximumFractionDigits: 0
   }).format(Number(value || 0));
 }

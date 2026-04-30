@@ -36,7 +36,7 @@ export default function DashboardPage() {
                   <Button asChild variant="outline">
                     <Link href="/shop">Browse marketplace</Link>
                   </Button>
-                  {user?.role === "Contributor" ? <UploadTemplateModal contributorName={user.name} triggerLabel="Upload Template" /> : null}
+                  {user?.role === "Contributor" ? <UploadTemplateModal contributorName={user.name} contributorEmail={user.email} triggerLabel="Upload Template" /> : null}
                 </div>
               </CardContent>
             </Card>

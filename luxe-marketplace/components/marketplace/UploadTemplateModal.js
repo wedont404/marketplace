@@ -21,7 +21,7 @@ const initialState = {
   previewImage: ""
 };
 
-export function UploadTemplateModal({ triggerLabel = "New Upload", contributorName = "Contributor" }) {
+export function UploadTemplateModal({ triggerLabel = "New Upload", contributorName = "Contributor", contributorEmail = "" }) {
   const [open, setOpen] = useState(false);
   const [progress, setProgress] = useState(0);
   const [submitting, setSubmitting] = useState(false);
@@ -43,6 +43,7 @@ export function UploadTemplateModal({ triggerLabel = "New Upload", contributorNa
 
     await uploadTemplate({
       contributorName,
+      contributorEmail,
       productName: form.productTitle,
       description: form.description,
       category: form.category,

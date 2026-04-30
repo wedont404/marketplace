@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 
-export function ProtectedRoute({ children, allow = ["Admin", "Contributor"] }) {
+export function ProtectedRoute({ children, allow = ["Admin", "Contributor", "Customer"] }) {
   const router = useRouter();
   const { user, loading } = useAuth();
 

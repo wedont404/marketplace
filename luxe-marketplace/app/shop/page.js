@@ -1,42 +1,64 @@
-// New shop page code with API integration, loading states, and error handling
+"use client";
 
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import { useMemo, useState } from "react";
+import { templates } from "@/lib/data";
+import { PageShell } from "@/components/layout/PageShell";
+import { SectionHeading } from "@/components/layout/SectionHeading";
+import { FilterBar } from "@/components/marketplace/FilterBar";
+import { ProductCard } from "@/components/marketplace/ProductCard";
 
-const ShopPage = () => {
-    const [products, setProducts] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
-
-    useEffect(() => {
-        const fetchProducts = async () => {
-            setLoading(true);
-            try {
-                const response = await axios.get('/api/products');
-                setProducts(response.data);
-            } catch (err) {
-                setError('Unable to fetch products. Please try again later.');
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchProducts();
-    }, []);
-
-    if (loading) return <div>Loading...</div>;
-    if (error) return <div>{error}</div>;
-
-    return (
-        <div>
-            <h1>Shop</h1>
-            <ul>
-                {products.map(product => (
-                    <li key={product.id}>{product.name}</li>
-                ))}
-            </ul>
-        </div>
-    );
+const initialFilters = {
+  search: "",
+  category: "All",
+  framework: "All",
+  price: "All",
+  darkMode: "All",
+  animationLevel: "All"
 };
 
-export default ShopPage;
+export default function ShopPage() {
+  const [filters, setFilters] = useState(initialFilters);
+
+  const filtered = useMemo(() => {
+    return templates.filter((product) => {
+      const matchSearch =
+        [product.name, product.description, product.tags.join(" ")].join(" ").toLowerCase().includes(filters.search.toLowerCase());
+      const matchCategory = filters.category === "All" || product.category === filters.category;
+      const matchFramework = filters.framework === "All" || product.framework === filters.framework;
+      const matchDark = filters.darkMode === "All" || product.darkMode === filters.darkMode;
+      const matchAnimation = filters.animationLevel === "All" || product.animationLevel === filters.animationLevel;
+      const matchPrice =
+        filters.price === "All" ||
+        (filters.price === "0-50" && product.price <= 50) ||
+        (filters.price === "51-100" && product.price >= 51 && product.price <= 100) ||
+        (filters.price === "101+" && product.price >= 101);
+
+      return matchSearch && matchCategory && matchFramework && matchDark && matchAnimation && matchPrice;
+    });
+  }, [filters]);
+
+  return (
+    <PageShell>
+      <section className="mx-auto max-w-7xl px-6 py-20">
+        <SectionHeading
+          eyebrow="Marketplace"
+          title="Frontend products presented like premium software"
+          description="Browse templates fetched from your Google Apps Script backend or fall back to curated local data during setup."
+        />
+
+        <div className="mt-10">
+          <FilterBar
+            filters={filters}
+            onFilterChange={(key, value) => setFilters((current) => ({ ...current, [key]: value }))}
+          />
+        </div>
+
+        <div className="mt-10 grid gap-6 lg:grid-cols-3">
+          {filtered.map((product) => (
+            <ProductCard key={product.id} product={product} />
+          ))}
+        </div>
+      </section>
+    </PageShell>
+  );
+}
