@@ -6,6 +6,7 @@ import { LayoutDashboard, LogOut, Menu, Shield, ShoppingBag, User2, X } from "lu
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
+import { getAdminPath } from "@/components/admin/AdminWorkspace";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/context/AuthContext";
 
@@ -24,7 +25,7 @@ export function Header() {
   const accountLinks = user
     ? [
         { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-        ...(isAdmin ? [{ href: "/admin", label: "Team Workspace", icon: Shield }] : [])
+        ...(isAdmin ? [{ href: getAdminPath(user?.email), label: "Team Workspace", icon: Shield }] : [])
       ]
     : [{ href: "/login", label: "Login", icon: User2 }];
 

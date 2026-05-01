@@ -85,13 +85,17 @@ export async function loginUser(payload) {
   });
 
   const matched = users.find(
-    (entry) => entry.email.toLowerCase() === payload.email.toLowerCase() && entry.password === payload.password
+    (entry) =>
+      (entry.email.toLowerCase() === String(payload.identifier || payload.email || "").toLowerCase() ||
+        String(entry.phone || "").toLowerCase() === String(payload.identifier || payload.email || "").toLowerCase()) &&
+      entry.password === payload.password
   );
 
   return result?.data || (matched ? {
     userId: matched.userId,
     name: matched.name,
     email: matched.email,
+    phone: matched.phone || "",
     role: matched.role,
     purchasedItems: matched.purchasedItems,
     favorites: matched.favorites
@@ -108,10 +112,29 @@ export async function registerUser(payload) {
     userId: `user-${Date.now()}`,
     name: payload.name,
     email: payload.email,
+    phone: payload.phone || "",
     role: payload.role || "Contributor",
     purchasedItems: [],
     favorites: []
   };
+}
+
+export async function requestPasswordReset(payload) {
+  const result = await request("requestPasswordReset", {
+    method: "POST",
+    body: payload
+  });
+
+  return result || { success: true, message: "Verification code sent." };
+}
+
+export async function verifyPasswordReset(payload) {
+  const result = await request("verifyPasswordReset", {
+    method: "POST",
+    body: payload
+  });
+
+  return result || { success: true };
 }
 
 export async function uploadTemplate(payload) {
@@ -149,4 +172,22 @@ export async function getHtmlShowcases() {
 export async function getDbConnections() {
   const result = await request("getDbConnections");
   return result?.data || dbConnections;
+}
+
+export async function saveHtmlShowcase(payload) {
+  const result = await request("saveHtmlShowcase", {
+    method: "POST",
+    body: payload
+  });
+
+  return result || { success: true, data: payload };
+}
+
+export async function saveDbConnection(payload) {
+  const result = await request("saveDbConnection", {
+    method: "POST",
+    body: payload
+  });
+
+  return result || { success: true, data: payload };
 }

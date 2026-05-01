@@ -17,3 +17,12 @@ Recommended Apps Script files:
 - `Code.gs`
 
 After creating the script project, paste each file into Apps Script with the same filename and deploy as a Web App.
+
+## Script Properties to add
+
+Open `Project Settings -> Script Properties` and add:
+
+- `WHATSAPP_API_TOKEN`
+- `WHATSAPP_PHONE_NUMBER_ID`
+
+The token should not be hardcoded inside the `.gs` files.

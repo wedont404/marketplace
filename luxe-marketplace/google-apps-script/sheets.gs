@@ -189,6 +189,8 @@ function seedDefaults_() {
         previewTitle: "Product cards with premium hover reveal",
         previewDescription: "Ready-to-wire index.html storefront with spotlight hero, card matrix, and backend notes.",
         backendSpec: "Needs Templates, Reviews, and SiteSettings actions.",
+        indexHtmlPath: "/showcases/luxury-product-grid/index.html",
+        sourcePath: "/showcases/luxury-product-grid/",
         previewImage: "",
         status: "Ready"
       },
@@ -201,6 +203,8 @@ function seedDefaults_() {
         previewTitle: "High-conversion agency launch page",
         previewDescription: "Optimized for bundles, testimonial blocks, and premium CTA flows.",
         backendSpec: "Needs Templates, Messages, and Orders actions.",
+        indexHtmlPath: "/showcases/agency-landing-index/index.html",
+        sourcePath: "/showcases/agency-landing-index/",
         previewImage: "",
         status: "Ready"
       }
@@ -211,10 +215,10 @@ function seedDefaults_() {
 
   if (readRows_("Users").length === 0) {
     [
-      { userId: "admin-1", name: "Tresor", email: "tresor@luxe.rw", passwordHash: hashPassword_("tresor123"), role: "Admin", purchasedItems: "[]", favorites: "[]", createdAt: nowIso_(), status: "Active" },
-      { userId: "admin-2", name: "Cyusa", email: "cyusa@luxe.rw", passwordHash: hashPassword_("cyusa123"), role: "Admin", purchasedItems: "[]", favorites: "[]", createdAt: nowIso_(), status: "Active" },
-      { userId: "admin-3", name: "Asly", email: "asly@luxe.rw", passwordHash: hashPassword_("asly123"), role: "Admin", purchasedItems: "[]", favorites: "[]", createdAt: nowIso_(), status: "Active" },
-      { userId: "user-001", name: "Studio Contributor", email: "contributor@luxe.rw", passwordHash: hashPassword_("demo123"), role: "Contributor", purchasedItems: "[]", favorites: "[]", createdAt: nowIso_(), status: "Active" }
+      { userId: "admin-1", name: "Tresor", email: "tresor@luxe.rw", phone: "+250700000001", passwordHash: hashPassword_("tresor123"), role: "Admin", purchasedItems: "[]", favorites: "[]", createdAt: nowIso_(), status: "Active" },
+      { userId: "admin-2", name: "Cyusa", email: "cyusa@luxe.rw", phone: "+250700000002", passwordHash: hashPassword_("cyusa123"), role: "Admin", purchasedItems: "[]", favorites: "[]", createdAt: nowIso_(), status: "Active" },
+      { userId: "admin-3", name: "Asly", email: "asly@luxe.rw", phone: "+250700000003", passwordHash: hashPassword_("asly123"), role: "Admin", purchasedItems: "[]", favorites: "[]", createdAt: nowIso_(), status: "Active" },
+      { userId: "user-001", name: "Studio Contributor", email: "contributor@luxe.rw", phone: "+250700000004", passwordHash: hashPassword_("demo123"), role: "Contributor", purchasedItems: "[]", favorites: "[]", createdAt: nowIso_(), status: "Active" }
     ].forEach(function (row) {
       appendRow_("Users", row);
     });

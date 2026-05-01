@@ -37,6 +37,10 @@ function handlePostAction_(action, payload) {
       return handleLoginUser_(payload);
     case "registerUser":
       return handleRegisterUser_(payload);
+    case "requestPasswordReset":
+      return handleRequestPasswordReset_(payload);
+    case "verifyPasswordReset":
+      return handleVerifyPasswordReset_(payload);
     case "saveAdminProfile":
       return handleSaveAdminProfile_(payload);
     case "saveHtmlShowcase":
@@ -187,6 +191,8 @@ function handleSaveHtmlShowcase_(payload) {
     previewTitle: payload.previewTitle || "",
     previewDescription: payload.previewDescription || "",
     backendSpec: payload.backendSpec || "",
+    indexHtmlPath: payload.indexHtmlPath || "",
+    sourcePath: payload.sourcePath || "",
     previewImage: payload.previewImage || "",
     status: payload.status || "Ready"
   };

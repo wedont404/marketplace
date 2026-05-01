@@ -20,8 +20,8 @@ export function AuthProvider({ children }) {
     setLoading(false);
   }, []);
 
-  const login = async ({ email, password }) => {
-    const authUser = await loginUser({ email, password });
+  const login = async ({ identifier, password }) => {
+    const authUser = await loginUser({ identifier, password });
 
     if (!authUser) {
       throw new Error("Invalid credentials");

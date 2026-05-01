@@ -136,6 +136,7 @@ export const users = [
     userId: "admin-1",
     name: "Tresor",
     email: "tresor@luxe.rw",
+    phone: "+250700000001",
     role: "Admin",
     password: "tresor123",
     purchasedItems: ["001", "003"],
@@ -145,6 +146,7 @@ export const users = [
     userId: "admin-2",
     name: "Cyusa",
     email: "cyusa@luxe.rw",
+    phone: "+250700000002",
     role: "Admin",
     password: "cyusa123",
     purchasedItems: ["001"],
@@ -154,6 +156,7 @@ export const users = [
     userId: "admin-3",
     name: "Asly",
     email: "asly@luxe.rw",
+    phone: "+250700000003",
     role: "Admin",
     password: "asly123",
     purchasedItems: ["002"],
@@ -163,6 +166,7 @@ export const users = [
     userId: "contrib-1",
     name: "Studio Contributor",
     email: "contributor@luxe.rw",
+    phone: "+250700000004",
     role: "Contributor",
     password: "demo123",
     purchasedItems: [],
@@ -213,6 +217,8 @@ export const htmlShowcases = [
     previewTitle: "Product cards with premium hover reveal",
     previewDescription: "Ready-to-wire index.html storefront with spotlight hero, card matrix, and backend notes.",
     backendSpec: "Needs Templates, Reviews, and SiteSettings actions.",
+    indexHtmlPath: "/showcases/luxury-product-grid/index.html",
+    sourcePath: "/showcases/luxury-product-grid/",
     previewImage: "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1200&q=80"
   },
   {
@@ -224,6 +230,8 @@ export const htmlShowcases = [
     previewTitle: "High-conversion agency launch page",
     previewDescription: "Optimized for bundles, testimonial blocks, and premium CTA flows.",
     backendSpec: "Needs Templates, Messages, and Orders actions.",
+    indexHtmlPath: "/showcases/agency-landing-index/index.html",
+    sourcePath: "/showcases/agency-landing-index/",
     previewImage: "https://images.unsplash.com/photo-1516321497487-e288fb19713f?auto=format&fit=crop&w=1200&q=80"
   },
   {
@@ -235,6 +243,8 @@ export const htmlShowcases = [
     previewTitle: "Internal asset browser with sidebar menu",
     previewDescription: "Ready for team previews, reusable blocks, and editable product data.",
     backendSpec: "Needs Uploads, Contributors, HtmlShowcases, and DbConnections actions.",
+    indexHtmlPath: "/showcases/dashboard-catalog-index/index.html",
+    sourcePath: "/showcases/dashboard-catalog-index/",
     previewImage: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=1200&q=80"
   }
 ];
