@@ -1,6 +1,8 @@
 import { adminProfiles, contributors, dbConnections, htmlShowcases, templates, uploads, users } from "@/lib/data";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
+const API_URL = typeof window === "undefined"
+  ? (process.env.APPS_SCRIPT_URL || process.env.NEXT_PUBLIC_API_URL || "")
+  : "/api/backend";
 
 async function request(action, options = {}) {
   if (!API_URL) {

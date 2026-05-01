@@ -63,7 +63,7 @@ export default function LoginPage() {
                 {mode === "login" ? "Secure Team Workspace Login" : mode === "forgot" ? "Reset your password" : "Create a workspace account"}
               </h1>
               <p className="text-sm leading-7 text-white/55">
-                Demo admin credentials: `tresor@luxe.rw / tresor123`, `cyusa@luxe.rw / cyusa123`, `asly@luxe.rw / asly123`
+                Authorized access only.
               </p>
             </div>
             <form className="space-y-4" onSubmit={handleSubmit}>

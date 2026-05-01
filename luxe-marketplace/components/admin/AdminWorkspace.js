@@ -15,13 +15,13 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
 const adminPaths = {
-  "tresor@luxe.rw": "/admin/tresor",
-  "cyusa@luxe.rw": "/admin/cyusa",
-  "asly@luxe.rw": "/admin/asly"
+  "tresor@luxe.rw": "/vault/tresor",
+  "cyusa@luxe.rw": "/vault/cyusa",
+  "asly@luxe.rw": "/vault/asly"
 };
 
 export function getAdminPath(email) {
-  return adminPaths[String(email || "").toLowerCase()] || "/admin";
+  return adminPaths[String(email || "").toLowerCase()] || "/vault";
 }
 
 export function AdminWorkspace({ ownerEmail, titleOverride }) {
@@ -60,26 +60,42 @@ export function AdminWorkspace({ ownerEmail, titleOverride }) {
     });
 
   const handleProfileChange = async (adminId, field, value) => {
-    const nextProfiles = profiles.map((profile) =>
-      profile.adminId === adminId ? { ...profile, [field]: value } : profile
+    setProfiles((current) =>
+      current.map((profile) => profile.adminId === adminId ? { ...profile, [field]: value } : profile)
     );
-    setProfiles(nextProfiles);
-    const updated = nextProfiles.find((profile) => profile.adminId === adminId);
-    await saveAdminProfile(updated);
   };
 
   const handleShowcaseChange = async (indexId, field, value) => {
-    const next = showcases.map((item) => item.indexId === indexId ? { ...item, [field]: value } : item);
-    setShowcases(next);
-    const updated = next.find((item) => item.indexId === indexId);
-    await saveHtmlShowcase(updated);
+    setShowcases((current) =>
+      current.map((item) => item.indexId === indexId ? { ...item, [field]: value } : item)
+    );
   };
 
   const handleConnectionChange = async (connectionId, field, value) => {
-    const next = connections.map((item) => item.connectionId === connectionId ? { ...item, [field]: value } : item);
-    setConnections(next);
-    const updated = next.find((item) => item.connectionId === connectionId);
-    await saveDbConnection(updated);
+    setConnections((current) =>
+      current.map((item) => item.connectionId === connectionId ? { ...item, [field]: value } : item)
+    );
+  };
+
+  const persistProfile = async (adminId) => {
+    const updated = profiles.find((profile) => profile.adminId === adminId);
+    if (updated) {
+      await saveAdminProfile(updated);
+    }
+  };
+
+  const persistShowcase = async (indexId) => {
+    const updated = showcases.find((item) => item.indexId === indexId);
+    if (updated) {
+      await saveHtmlShowcase(updated);
+    }
+  };
+
+  const persistConnection = async (connectionId) => {
+    const updated = connections.find((item) => item.connectionId === connectionId);
+    if (updated) {
+      await saveDbConnection(updated);
+    }
   };
 
   return (
@@ -153,6 +169,10 @@ export function AdminWorkspace({ ownerEmail, titleOverride }) {
                     onChange={(e) => handleProfileChange(profile.adminId, "styleNote", e.target.value)}
                   />
                   <div className="pt-2 text-xs text-white/45">{profile.email}</div>
+                  <Button variant="outline" size="sm" onClick={() => persistProfile(profile.adminId)}>
+                    <Save className="mr-2 h-4 w-4" />
+                    Save Profile
+                  </Button>
                 </div>
               </div>
             ))}
@@ -286,10 +306,10 @@ export function AdminWorkspace({ ownerEmail, titleOverride }) {
                     <div className="text-base font-medium text-[rgb(244,195,74)]">
                       {new Intl.NumberFormat("en-RW", { style: "currency", currency: "RWF", maximumFractionDigits: 0 }).format(Number(item.priceRwf || 0))}
                     </div>
-                    <div className="flex items-center gap-2 text-xs text-white/45">
-                      <Save className="h-3.5 w-3.5" />
-                      Auto-saved
-                    </div>
+                    <Button variant="outline" size="sm" onClick={() => persistShowcase(item.indexId)}>
+                      <Save className="mr-2 h-3.5 w-3.5" />
+                      Save Card
+                    </Button>
                   </div>
                 </div>
               </div>
@@ -325,6 +345,10 @@ export function AdminWorkspace({ ownerEmail, titleOverride }) {
                   value={connection.target}
                   onChange={(e) => handleConnectionChange(connection.connectionId, "target", e.target.value)}
                 />
+                <Button className="mt-3" variant="outline" size="sm" onClick={() => persistConnection(connection.connectionId)}>
+                  <Save className="mr-2 h-4 w-4" />
+                  Save Connection
+                </Button>
               </div>
             ))}
           </div>

@@ -1,9 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { LayoutDashboard, LogOut, Menu, Shield, ShoppingBag, User2, X } from "lucide-react";
-import { useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { LayoutDashboard, LogOut, Menu, ShoppingBag, User2, X } from "lucide-react";
+import { useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { getAdminPath } from "@/components/admin/AdminWorkspace";
@@ -19,20 +19,41 @@ const navItems = [
 
 export function Header() {
   const pathname = usePathname();
-  const { user, logout, isAdmin } = useAuth();
+  const router = useRouter();
+  const { user, logout } = useAuth();
   const [open, setOpen] = useState(false);
+  const tapState = useRef({ count: 0, timeout: null });
 
   const accountLinks = user
     ? [
-        { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-        ...(isAdmin ? [{ href: getAdminPath(user?.email), label: "Team Workspace", icon: Shield }] : [])
+        { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard }
       ]
     : [{ href: "/login", label: "Login", icon: User2 }];
+
+  const handleBrandClick = () => {
+    if (user?.role === "Admin") {
+      tapState.current.count += 1;
+      if (tapState.current.timeout) {
+        clearTimeout(tapState.current.timeout);
+      }
+      tapState.current.timeout = setTimeout(() => {
+        tapState.current.count = 0;
+      }, 1400);
+
+      if (tapState.current.count >= 5) {
+        tapState.current.count = 0;
+        router.push("/vault");
+        return;
+      }
+    }
+
+    router.push("/");
+  };
 
   return (
     <header className="sticky top-0 z-40 border-b border-white/5 bg-[#060b13]/70 backdrop-blur-xl">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-        <Link href="/" className="flex items-center gap-3">
+        <button type="button" onClick={handleBrandClick} className="flex items-center gap-3">
           <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-lg font-semibold">
             L
           </div>
@@ -40,7 +61,7 @@ export function Header() {
             <div className="font-semibold tracking-[0.24em] text-white/90">LUXE</div>
             <div className="text-xs uppercase tracking-[0.28em] text-white/45">Marketplace</div>
           </div>
-        </Link>
+        </button>
 
         <nav className="hidden items-center gap-8 lg:flex">
           {navItems.map((item) => (

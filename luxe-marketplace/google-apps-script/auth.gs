@@ -69,10 +69,13 @@ function sendWhatsAppVerification_(to, code) {
 }
 
 function handleLoginUser_(payload) {
-  const email = String(payload.email || "").toLowerCase();
+  const identifier = String(payload.identifier || payload.email || "").toLowerCase().trim();
   const passwordHash = hashPassword_(String(payload.password || ""));
   const user = readRows_("Users").find(function (row) {
-    return String(row.email).toLowerCase() === email &&
+    return (
+      String(row.email || "").toLowerCase() === identifier ||
+      String(row.phone || "").toLowerCase() === identifier
+    ) &&
       String(row.passwordHash) === passwordHash &&
       String(row.status || "Active") === "Active";
   });
