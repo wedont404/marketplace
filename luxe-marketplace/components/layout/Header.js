@@ -51,7 +51,7 @@ export function Header() {
   };
 
   return (
-    <header className="sticky top-0 z-40 border-b border-white/5 bg-[#060b13]/70 backdrop-blur-xl">
+    <header className="sticky top-0 z-40 border-b border-white/5 bg-[#060b14]/70 backdrop-blur-xl">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
         <button type="button" onClick={handleBrandClick} className="flex items-center gap-3">
           <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-lg font-semibold">
